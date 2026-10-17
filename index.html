@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campus Event Billboard - Home</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Main Navigation Bar -->
+    <header class="navbar">
+        <div class="logo">
+            <h2>Campus<span>Events</span></h2>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="index.html" class="active">Home</a></li>
+                <li><a href="submit.html">Admin Portal</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Hero Banner -->
+    <section class="hero">
+        <h1>Discover What's Happening On Campus</h1>
+        <p>Your ultimate bulletin board for student clubs, workshops, sports, and social events.</p>
+    </section>
+
+    <!-- Main Content Container -->
+    <main class="container">
+        
+        <!-- Filter & Search Controls -->
+        <section class="controls" id="events">
+            <input type="text" id="search-input" placeholder="Search events by title...">
+            
+            <select id="category-filter">
+                <option value="all">All Categories</option>
+                <option value="Academic">Academic</option>
+                <option value="Sports">Sports</option>
+                <option value="Social">Social</option>
+                <option value="Workshops">Workshops</option>
+                <option value="ClubsEvents">Clubs Events</option>
+            </select>
+
+            <select id="date-filter">
+                <option value="all">All Dates</option>
+                <option value="this-week">This Week</option>
+                <option value="next-week">Next Week</option>
+                <option value="this-month">This Month</option>
+                <option value="next-month">Next Month</option>
+            </select>
+        </section>
+
+        <!-- Events Grid -->
+        <section class="events-grid" id="events-container">
+            <!-- Event cards will be dynamically added here -->
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer style="text-align: center; padding: 2rem; color: #64748b; font-size: 0.9rem; border-top: 1px solid #cbd5e1; margin-top: 3rem;">
+        <p>&copy; 2026 Campus Events Billboard. Built for Part 2 Web Development Assignment.</p>
+    </footer>
+
+    <script src="script.js"></script>
+
+    <!-- Event Details Modal (Popup) -->
+    <div id="event-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <div id="modal-body">
+                <!-- Full event details load here -->
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
