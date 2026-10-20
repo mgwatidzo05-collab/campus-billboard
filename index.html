@@ -3,78 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Campus Event Billboard - Home</title>
+    <title>Campus Event Billboard - NUST</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-    <!-- Main Navigation Bar -->
     <header class="navbar">
-        <div class="logo">
-            <h2>Campus<span>Events</span></h2>
-        </div>
-        <nav>
-            <ul>
+        <div class="logo"><h2>NUST <span>Events</span></h2></div>
+        <div class="menu-container">
+            <button class="menu-btn" onclick="toggleMenu(event)">Menu ☰</button>
+            <ul class="dropdown-menu" id="dropdown-menu">
                 <li><a href="index.html" class="active">Home</a></li>
-                <li><a href="submit.html">Admin Portal</a></li>
+                <li><a href="events.html">Browse Events</a></li>
+                <li><a href="login.html">Student Portal</a></li>
+                <li><a href="admin.html">Admin Dashboard</a></li>
             </ul>
-        </nav>
+        </div>
     </header>
 
-    <!-- Hero Banner -->
-    <section class="hero">
-        <h1>Discover What's Happening On Campus</h1>
-        <p>Your ultimate bulletin board for student clubs, workshops, sports, and social events.</p>
-    </section>
-
-    <!-- Main Content Container -->
     <main class="container">
-        
-        <!-- Filter & Search Controls -->
-        <section class="controls" id="events">
-            <input type="text" id="search-input" placeholder="Search events by title...">
-            
-            <select id="category-filter">
-                <option value="all">All Categories</option>
-                <option value="Academic">Academic</option>
-                <option value="Sports">Sports</option>
-                <option value="Social">Social</option>
-                <option value="Workshops">Workshops</option>
-                <option value="ClubsEvents">Clubs Events</option>
-            </select>
-
-            <select id="date-filter">
-                <option value="all">All Dates</option>
-                <option value="this-week">This Week</option>
-                <option value="next-week">Next Week</option>
-                <option value="this-month">This Month</option>
-                <option value="next-month">Next Month</option>
-            </select>
+        <section class="hero">
+            <h1>Welcome NUST Students!</h1>
+            <p>Your official gateway to discover what's happening around campus. Please sign up or sign in as a student first to unlock and view all active campus events.</p>
+            <div style="margin-top: 1.5rem;">
+                <a href="login.html" class="btn-primary" style="margin-right: 1rem;">Student Sign Up / Sign In</a>
+            </div>
         </section>
 
-        <!-- Events Grid -->
-        <section class="events-grid" id="events-container">
-            <!-- Event cards will be dynamically added here -->
+        <section class="form-section" style="text-align: center; margin-top: 2rem;">
+            <h2>About the NUST Campus Event Billboard</h2>
+            <p style="margin-top: 1rem; color: var(--text-muted); max-width: 800px; margin-left: auto; margin-right: auto;">
+                The NUST Campus Event Billboard is a centralized platform designed to keep students informed about academic seminars, tech hackathons, club meetups, and social gatherings happening across the National University of Science and Technology. By creating an account, students gain instant access to verified campus happenings, helping you stay connected and engaged with student life.
+            </p>
         </section>
-
     </main>
 
-    <!-- Footer -->
-    <footer style="text-align: center; padding: 2rem; color: #64748b; font-size: 0.9rem; border-top: 1px solid #cbd5e1; margin-top: 3rem;">
-        <p>&copy; 2026 Campus Events Billboard. Built for Part 2 Web Development Assignment.</p>
-    </footer>
-
+    <script>
+        function toggleMenu(e) {
+            e.stopPropagation();
+            const menu = document.getElementById('dropdown-menu');
+            menu.classList.toggle('show');
+        }
+        window.onclick = function() {
+            const menu = document.getElementById('dropdown-menu');
+            if (menu) menu.classList.remove('show');
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/appwrite@16.0.2"></script>
     <script src="script.js"></script>
-
-    <!-- Event Details Modal (Popup) -->
-    <div id="event-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal">&times;</span>
-            <div id="modal-body">
-                <!-- Full event details load here -->
-            </div>
-        </div>
-    </div>
-
 </body>
 </html>

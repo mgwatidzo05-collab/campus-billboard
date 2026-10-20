@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - NUST Campus Billboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="navbar">
+        <div class="logo"><h2>NUST <span>Events</span></h2></div>
+        <div class="menu-container">
+            <button class="menu-btn" onclick="toggleMenu(event)">Menu ☰</button>
+            <ul class="dropdown-menu" id="dropdown-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="events.html">Browse Events</a></li>
+                <li><a href="login.html">Student Portal</a></li>
+                <li><a href="admin.html" class="active">Admin Dashboard</a></li>
+            </ul>
+        </div>
+    </header>
+
+    <!-- Admin Password Gate (No hints displayed) -->
+    <main class="container" id="admin-gate" style="max-width: 450px; margin-top: 5rem;">
+        <div class="form-section">
+            <h2>Admin Authentication</h2>
+            <p style="margin: 0.5rem 0 1.5rem 0; color: var(--text-muted); font-size: 0.95rem;">Restricted area. Authorized personnel only.</p>
+            <form id="admin-pass-form">
+                <div class="form-group">
+                    <label>Passcode</label>
+                    <input type="password" id="admin-passcode" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="submit-btn">Access Dashboard</button>
+            </form>
+        </div>
+    </main>
+
+    <!-- Actual Admin Content (Hidden until password is correct) -->
+    <main class="container" id="admin-content" style="display: none;">
+        <h2 style="margin-bottom: 1.5rem;">Event Management Dashboard</h2>
+        
+        <div class="form-section" style="margin-bottom: 3rem;">
+            <h3>Publish New Event</h3>
+            <form id="event-form" style="margin-top: 1.5rem;">
+                <div class="form-group">
+                    <label>Event Title</label>
+                    <input type="text" id="event-title" required placeholder="Hackathon 2026">
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <input type="text" id="event-category" required placeholder="Academic / Tech">
+                </div>
+                <div class="form-group">
+                    <label>Date & Time</label>
+                    <input type="datetime-local" id="event-date" required>
+                </div>
+                <div class="form-group">
+                    <label>Location</label>
+                    <input type="text" id="event-location" required placeholder="NUST Main Auditorium">
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="event-desc" rows="3" required placeholder="Details about the event..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Image URL</label>
+                    <input type="text" id="event-image" placeholder="https://images.unsplash.com/photo-...">
+                </div>
+                <button type="submit" class="submit-btn">Publish Event</button>
+            </form>
+        </div>
+
+        <h3>Existing Events Control</h3>
+        <div id="admin-events-container" class="event-grid" style="margin-top: 1.5rem;">
+            <!-- Loaded via script.js -->
+        </div>
+    </main>
+
+    <script>
+        function toggleMenu(e) {
+            e.stopPropagation();
+            const menu = document.getElementById('dropdown-menu');
+            menu.classList.toggle('show');
+        }
+        window.onclick = function() {
+            const menu = document.getElementById('dropdown-menu');
+            if (menu) menu.classList.remove('show');
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/appwrite@16.0.2"></script>
+    <script src="script.js"></script>
+</body>
+</html>

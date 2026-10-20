@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browse Events - NUST Campus Billboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="navbar">
+        <div class="logo"><h2>NUST <span>Events</span></h2></div>
+        <div class="menu-container">
+            <button class="menu-btn" onclick="toggleMenu(event)">Menu ☰</button>
+            <ul class="dropdown-menu" id="dropdown-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="events.html" class="active">Browse Events</a></li>
+                <li><a href="login.html">Student Portal</a></li>
+                <li><a href="admin.html">Admin Dashboard</a></li>
+            </ul>
+        </div>
+    </header>
+
+    <main class="container">
+        <h2 style="margin-bottom: 1.5rem;">NUST Campus Activities</h2>
+        <div id="events-container" class="event-grid">
+            <!-- Dynamically loaded via script.js -->
+        </div>
+    </main>
+
+    <script>
+        function toggleMenu(e) {
+            e.stopPropagation();
+            const menu = document.getElementById('dropdown-menu');
+            menu.classList.toggle('show');
+        }
+        window.onclick = function() {
+            const menu = document.getElementById('dropdown-menu');
+            if (menu) menu.classList.remove('show');
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/appwrite@16.0.2"></script>
+    <script src="script.js"></script>
+</body>
+</html>

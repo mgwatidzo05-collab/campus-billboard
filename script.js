@@ -1,402 +1,348 @@
-// Default Sample Event Data (8 Events)
-const defaultEvents = [
-    {
-        id: 1,
-        title: "Annual Tech Hackathon 2026",
-        category: "Academic",
-        date: "2026-11-10",
-        location: "Computer Lab 3, Science Block",
-        image: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=600&q=80",
-        description: "Join fellow students for 12 hours of coding, innovation, and pizza! Prizes to be won. Bring your laptops, chargers, and plenty of creative energy. Mentors will be available throughout the day to help debug code, brainstorm architectural ideas, and guide teams from start to finish."
-    },
-    {
-        id: 2,
-        title: "Inter-Faculty Football Finals",
-        category: "Sports",
-        date: "2026-11-14",
-        location: "Main Sports Complex Field",
-        image: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=600&q=80",
-        description: "Come support Computer Science as they face Engineering in the final match of the season. Food trucks, live student commentary, and refreshing drinks will be available at the sidelines. Let's bring home the faculty trophy and show our team spirit!"
-    },
-    {
-        id: 3,
-        title: "Welcome Freshers Social Mixer",
-        category: "Social",
-        date: "2026-11-18",
-        location: "Student Union Building",
-        image: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=600&q=80",
-        description: "Meet new friends, enjoy great music from our student DJ guild, and grab some free snacks at our welcome party. A fantastic opportunity to connect with senior students, learn about campus clubs, and unwind after classes."
-    },
-    {
-        id: 4,
-        title: "Resume & LinkedIn Masterclass",
-        category: "Workshops",
-        date: "2026-11-22",
-        location: "Auditorium Hall B",
-        image: "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=600&q=80",
-        description: "Learn how to build an industry-ready resume and optimize your LinkedIn profile from career experts and alumni recruiters. Bring your current resume on a flash drive or laptop for live one-on-one critique sessions and optimization tips."
-    },
-    {
-        id: 5,
-        title: "AI & Machine Learning Seminar",
-        category: "Academic",
-        date: "2026-11-25",
-        location: "Lecture Theatre 1",
-        image: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=600&q=80",
-        description: "Explore the fundamentals of modern Artificial Intelligence and Large Language Models. Guest speaker Dr. Elena Vance will discuss ethical considerations in AI development and career pathways in data science."
-    },
-    {
-        id: 6,
-        title: "Campus Open Mic & Acoustic Night",
-        category: "Social",
-        date: "2026-12-02",
-        location: "University Coffee Lounge",
-        image: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=600&q=80",
-        description: "Show off your musical talents, poetry readings, or stand-up comedy routines! Sign-ups begin at 5:00 PM at the venue. Hot chocolate and pastries will be served."
-    },
-    {
-        id: 7,
-        title: "Inter-Hall Basketball Tournament",
-        category: "Sports",
-        date: "2026-12-08",
-        location: "Indoor Gymnasium",
-        image: "https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=600&q=80",
-        description: "Cheer on your residence hall teams as they battle it out for the inter-hall basketball championship cup. Free entry and noisy noisemakers encouraged!"
-    },
-    {
-        id: 8,
-        title: "UI/UX Design Systems Workshop",
-        category: "Workshops",
-        date: "2026-12-15",
-        location: "Design Lab 2",
-        image: "https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?auto=format&fit=crop&w=600&q=80",
-        description: "Learn how to build scalable design systems in Figma. We will cover component states, auto-layout best practices, and tokens for modern web and mobile developers."
-    }
-];
+// Initialize Appwrite SDK
+const { Client, Account, Databases, ID } = Appwrite;
 
-// --- LOAD & AUTO-EXPIRATION LOGIC ---
-let rawEvents = JSON.parse(localStorage.getItem('campusEvents'));
+const client = new Client()
+    .setEndpoint('https://cloud.appwrite.io/v1') 
+    .setProject('6ad7e4d6003c3d578dd6'); 
 
-if (!rawEvents) {
-    rawEvents = defaultEvents;
-    localStorage.setItem('campusEvents', JSON.stringify(defaultEvents));
+const account = new Account(client);
+const databases = new Databases(client);
+
+const DATABASE_ID = '6ad7e4f8000773fc5f89';       
+const COLLECTION_ID = 'events';                   
+
+// --- ROUTE PROTECTION CHECK (Events page requires login) ---
+const currentPage = window.location.pathname.split('/').pop();
+
+if (currentPage === 'events.html') {
+    window.addEventListener('DOMContentLoaded', async () => {
+        try {
+            await account.get(); 
+        } catch (error) {
+            alert('Access Denied! You must sign up or sign in as a student to browse NUST events.');
+            window.location.href = 'login.html';
+        }
+    });
 }
 
-const today = new Date();
-today.setHours(0, 0, 0, 0);
+// --- ADMIN GATE PROTECTION (`admin123`) ---
+document.addEventListener('DOMContentLoaded', () => {
+    const adminGate = document.getElementById('admin-gate');
+    const adminContent = document.getElementById('admin-content');
+    const adminPassForm = document.getElementById('admin-pass-form');
 
-let events = rawEvents.filter(event => {
-    const eventDate = new Date(event.date);
-    eventDate.setHours(0, 0, 0, 0);
-    return eventDate >= today;
+    if (adminPassForm) {
+        adminPassForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const passcode = document.getElementById('admin-passcode').value;
+            if (passcode === 'admin123') {
+                if (adminGate) adminGate.style.display = 'none';
+                if (adminContent) adminContent.style.display = 'block';
+                loadAdminEvents();
+            } else {
+                alert('Incorrect passcode! Access denied.');
+            }
+        });
+    }
 });
 
-localStorage.setItem('campusEvents', JSON.stringify(events));
 
+// --- AUTHENTICATION & FORM SWITCHING (Register / Sign In) ---
+document.addEventListener('DOMContentLoaded', () => {
+    const showSignup = document.getElementById('show-signup');
+    const showSignin = document.getElementById('show-signin');
+    const signinSection = document.getElementById('signin-section');
+    const signupSection = document.getElementById('signup-section');
 
-// --- AUTO-INJECT MODAL HTML ---
-if (!document.getElementById('event-modal')) {
-    const modalHTML = `
-        <div id="event-modal" class="modal" style="display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.6); justify-content:center; align-items:center; padding:1rem;">
-            <div class="modal-content" style="background:white; padding:2rem; border-radius:12px; max-width:550px; width:100%; max-height:90vh; overflow-y:auto; position:relative; box-shadow:0 20px 25px -5px rgba(0,0,0,0.1);">
-                <span class="close-modal" style="position:absolute; top:1rem; right:1.2rem; font-size:1.8rem; cursor:pointer; color:#64748b; font-weight:bold;">&times;</span>
-                <div id="modal-body"></div>
-            </div>
-        </div>
-    `;
-    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    if (showSignup && showSignin && signinSection && signupSection) {
+        showSignup.onclick = function(e) {
+            e.preventDefault();
+            signinSection.style.display = 'none';
+            signupSection.style.display = 'block';
+        };
+
+        showSignin.onclick = function(e) {
+            e.preventDefault();
+            signupSection.style.display = 'none';
+            signinSection.style.display = 'block';
+        };
+    }
+});
+
+// Register User (Auto-login & Redirect)
+const signupForm = document.getElementById('signup-form');
+if (signupForm) {
+    signupForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const name = document.getElementById('signup-name').value;
+        const email = document.getElementById('signup-email').value;
+        const password = document.getElementById('signup-password').value;
+
+        try {
+            await account.create(ID.unique(), email, password, name);
+            await account.createEmailPasswordSession(email, password);
+            alert('Account created successfully! Welcome to NUST Events.');
+            window.location.href = 'events.html';
+        } catch (error) {
+            alert('Registration failed: ' + error.message);
+        }
+    });
 }
 
+// Sign In User
+const signinForm = document.getElementById('signin-form');
+if (signinForm) {
+    signinForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('signin-email').value;
+        const password = document.getElementById('signin-password').value;
 
-// --- HOME PAGE LOGIC ---
-const eventsContainer = document.getElementById('events-container');
-const searchInput = document.getElementById('search-input');
-const categoryFilter = document.getElementById('category-filter');
-const dateFilter = document.getElementById('date-filter');
+        try {
+            await account.createEmailPasswordSession(email, password);
+            alert('Signed in successfully!');
+            window.location.href = 'events.html';
+        } catch (error) {
+            alert('Login failed: ' + error.message);
+        }
+    });
+}
 
-const modal = document.getElementById('event-modal');
-const modalBody = document.getElementById('modal-body');
-const closeModal = modal.querySelector('.close-modal');
+// Session Check on Login Page Load
+window.addEventListener('DOMContentLoaded', async () => {
+    const signinSection = document.getElementById('signin-section');
+    const signupSection = document.getElementById('signup-section');
+    const userProfile = document.getElementById('user-profile');
 
-if (eventsContainer) {
-    function renderEvents(eventsToDisplay) {
-        eventsContainer.innerHTML = '';
+    try {
+        const user = await account.get();
+        if (signinSection && signupSection && userProfile) {
+            signinSection.style.display = 'none';
+            signupSection.style.display = 'none';
+            userProfile.style.display = 'block';
+            document.getElementById('profile-name').innerText = user.name;
+        }
+    } catch (error) {
+        // Not logged in
+    }
+});
 
-        if (eventsToDisplay.length === 0) {
-            eventsContainer.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #64748b;">No upcoming events found.</p>';
+// Logout
+const logoutBtn = document.getElementById('logout-btn');
+if (logoutBtn) {
+    logoutBtn.addEventListener('click', async () => {
+        try {
+            await account.deleteSession('current');
+            alert('Signed out successfully.');
+            window.location.href = 'index.html';
+        } catch (error) {
+            alert('Logout error: ' + error.message);
+        }
+    });
+};
+
+
+// --- DATABASE CRUD LOGIC & DUMMY DATA SEEDING ---
+
+function formatDate(dateString) {
+    if (!dateString) return 'TBA';
+    const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+    return new Date(dateString).toLocaleDateString(undefined, options);
+}
+
+// Seed Dummy Data if Database is Empty
+async function seedDummyDataIfEmpty(events) {
+    if (events.length > 0) return; 
+
+    const dummyEvents = [
+        {
+            title: "NUST Annual Tech Hackathon 2026",
+            category: "Tech / Innovation",
+            date: new Date(Date.now() + 86400000 * 3).toISOString(),
+            location: "Computer Science Lab 1",
+            description: "Join fellow developers to build localized software solutions and win exciting prizes.",
+            image: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97"
+        },
+        {
+            title: "AI & Machine Learning Seminar",
+            category: "Academic",
+            date: new Date(Date.now() + 86400000 * 7).toISOString(),
+            location: "Main Auditorium",
+            description: "An intensive seminar exploring modern neural networks and AI applications in Africa.",
+            image: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e"
+        },
+        {
+            title: "NUST SRC Welcome Music Jam",
+            category: "Social",
+            date: new Date(Date.now() + 86400000 * 12).toISOString(),
+            location: "University Student Square",
+            description: "Unwind after classes with live performances, games, and food stalls.",
+            image: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30"
+        }
+    ];
+
+    try {
+        for (let item of dummyEvents) {
+            await databases.createDocument(DATABASE_ID, COLLECTION_ID, ID.unique(), item);
+        }
+        window.location.reload(); 
+    } catch (e) {
+        console.error("Auto-seeding error:", e);
+    }
+}
+
+// Fetch & Display Events (On events.html)
+async function loadEvents() {
+    const container = document.getElementById('events-container');
+    if (!container) return;
+
+    try {
+        const response = await databases.listDocuments(DATABASE_ID, COLLECTION_ID);
+        let events = response.documents;
+
+        if (events.length === 0) {
+            await seedDummyDataIfEmpty(events);
             return;
         }
 
-        eventsToDisplay.forEach(event => {
+        container.innerHTML = '';
+        events.forEach(event => {
             const card = document.createElement('div');
-            card.classList.add('event-card');
-
-            let imageHTML = event.image ? `<img src="${event.image}" alt="${event.title}">` : '';
-
-            const formattedDate = new Date(event.date).toLocaleDateString('en-US', { 
-                month: 'short', 
-                day: 'numeric', 
-                year: 'numeric' 
-            });
-
-            const shortDesc = event.description.length > 80 ? event.description.substring(0, 80) + '...' : event.description;
-
+            card.className = 'event-card';
             card.innerHTML = `
-                ${imageHTML}
+                <img src="${event.image || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87'}" alt="Event">
                 <span class="event-category">${event.category}</span>
                 <h3>${event.title}</h3>
-                <p class="event-date">📅 ${formattedDate}</p>
+                <p class="event-date">📅 ${formatDate(event.date)}</p>
                 <p class="event-location">📍 ${event.location}</p>
-                <p class="event-desc">${shortDesc}</p>
-                <p style="font-size: 0.85rem; color: #0284c7; margin-top: 0.75rem; font-weight: 600;">Click to read full details &rarr;</p>
+                <p class="event-desc">${event.description}</p>
             `;
-
-            card.onclick = function() {
-                openModal(event);
-            };
-
-            eventsContainer.appendChild(card);
+            container.appendChild(card);
         });
+    } catch (error) {
+        console.error('Error fetching documents:', error);
     }
-
-    function openModal(event) {
-        const formattedDate = new Date(event.date).toLocaleDateString('en-US', { 
-            weekday: 'long',
-            month: 'long', 
-            day: 'numeric', 
-            year: 'numeric' 
-        });
-
-        modalBody.innerHTML = `
-            ${event.image ? `<img src="${event.image}" class="modal-img" alt="${event.title}">` : ''}
-            <span class="event-category">${event.category}</span>
-            <h2 style="margin-top: 0.5rem; color: #0f172a;">${event.title}</h2>
-            <p style="font-size: 0.95rem; color: #64748b; margin-top: 0.4rem;">📅 <strong>Date:</strong> ${formattedDate}</p>
-            <p style="font-size: 0.95rem; color: #64748b; margin-top: 0.2rem;">📍 <strong>Location:</strong> ${event.location}</p>
-            <p style="margin-top: 1rem; line-height: 1.6; color: #334155; white-space: pre-line;">${event.description}</p>
-        `;
-
-        modal.style.display = 'flex';
-    }
-
-    closeModal.onclick = function() {
-        modal.style.display = 'none';
-    };
-
-    window.onclick = function(e) {
-        if (e.target === modal) {
-            modal.style.display = 'none';
-        }
-    };
-
-    function filterEvents() {
-        const searchTerm = searchInput.value.toLowerCase();
-        const selectedCategory = categoryFilter.value;
-        const selectedDateRange = dateFilter.value;
-
-        const filtered = events.filter(event => {
-            const matchesSearch = event.title.toLowerCase().includes(searchTerm) || 
-                                  event.description.toLowerCase().includes(searchTerm);
-            const matchesCategory = selectedCategory === 'all' || event.category === selectedCategory;
-
-            let matchesDate = true;
-            const eventDate = new Date(event.date);
-            eventDate.setHours(0, 0, 0, 0);
-
-            const diffTime = eventDate - today;
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-            if (selectedDateRange === 'this-week') {
-                matchesDate = diffDays >= 0 && diffDays <= 7;
-            } else if (selectedDateRange === 'next-week') {
-                matchesDate = diffDays > 7 && diffDays <= 14;
-            } else if (selectedDateRange === 'this-month') {
-                matchesDate = eventDate.getMonth() === today.getMonth() && eventDate.getFullYear() === today.getFullYear();
-            } else if (selectedDateRange === 'next-month') {
-                const targetMonth = (today.getMonth() + 1) % 12;
-                const targetYear = today.getMonth() === 11 ? today.getFullYear() + 1 : today.getFullYear();
-                matchesDate = eventDate.getMonth() === targetMonth && eventDate.getFullYear() === targetYear;
-            }
-
-            return matchesSearch && matchesCategory && matchesDate;
-        });
-
-        renderEvents(filtered);
-    }
-
-    searchInput.addEventListener('input', filterEvents);
-    categoryFilter.addEventListener('change', filterEvents);
-    dateFilter.addEventListener('change', filterEvents);
-
-    renderEvents(events);
 }
+loadEvents();
 
-
-// --- ADMIN PORTAL LOGIC (`submit.html`) ---
-const loginForm = document.getElementById('login-form');
-const loginSection = document.getElementById('login-section');
-const adminDashboard = document.getElementById('admin-dashboard');
+// Create Event (Admin Page)
 const eventForm = document.getElementById('event-form');
-const manageEventsContainer = document.getElementById('manage-events-container');
-const submitBtn = document.getElementById('submit-btn');
-const cancelBtn = document.getElementById('cancel-btn');
-
-let editingEventId = null; // Track if we are editing an event
-
-if (loginForm) {
-    loginForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        const passwordInput = document.getElementById('admin-passcode').value;
-
-        if (passwordInput === 'admin123') {
-            loginSection.style.display = 'none';
-            adminDashboard.style.display = 'block';
-            renderManagementList();
-        } else {
-            alert('Incorrect Admin Password!');
-        }
-    });
-}
-
-function renderManagementList() {
-    if (!manageEventsContainer) return;
-    manageEventsContainer.innerHTML = '';
-
-    if (events.length === 0) {
-        manageEventsContainer.innerHTML = '<p style="color: #64748b;">No events to manage.</p>';
-        return;
-    }
-
-    events.forEach(event => {
-        const item = document.createElement('div');
-        item.classList.add('manage-item');
-
-        const formattedDate = new Date(event.date).toLocaleDateString('en-US', { 
-            month: 'short', 
-            day: 'numeric', 
-            year: 'numeric' 
-        });
-
-        item.innerHTML = `
-            <div class="manage-item-info">
-                <h4>${event.title}</h4>
-                <p>📅 ${formattedDate} • 📍 ${event.location}</p>
-            </div>
-            <div style="display: flex; gap: 0.5rem;">
-                <button class="edit-btn" onclick="editEvent(${event.id})" style="background-color: #e0f2fe; color: #0369a1; border: none; padding: 0.4rem 0.8rem; font-size: 0.8rem; font-weight: 600; border-radius: 6px; cursor: pointer;">Edit</button>
-                <button class="delete-btn" onclick="deleteEvent(${event.id})">Delete</button>
-            </div>
-        `;
-
-        manageEventsContainer.appendChild(item);
-    });
-}
-
-// Function to populate form with event details for editing
-window.editEvent = function(id) {
-    const eventToEdit = events.find(ev => ev.id === id);
-    if (!eventToEdit) return;
-
-    // Fill form fields
-    document.getElementById('event-title').value = eventToEdit.title;
-    document.getElementById('event-category').value = eventToEdit.category;
-    document.getElementById('event-date').value = eventToEdit.date;
-    document.getElementById('event-location').value = eventToEdit.location;
-    document.getElementById('event-desc').value = eventToEdit.description;
-
-    // Switch state to editing mode
-    editingEventId = id;
-    submitBtn.innerText = "Update Event";
-    cancelBtn.style.display = "block";
-
-    // Scroll smoothly up to the form
-    eventForm.scrollIntoView({ behavior: 'smooth' });
-};
-
-// Cancel Edit Mode
-if (cancelBtn) {
-    cancelBtn.onclick = function() {
-        editingEventId = null;
-        eventForm.reset();
-        submitBtn.innerText = "Publish Event";
-        cancelBtn.style.display = "none";
-    };
-}
-
-window.deleteEvent = function(id) {
-    if (confirm("Are you sure you want to delete this event?")) {
-        events = events.filter(event => event.id !== id);
-        localStorage.setItem('campusEvents', JSON.stringify(events));
-        renderManagementList();
-        alert('Event deleted successfully.');
-    }
-};
-
 if (eventForm) {
-    eventForm.addEventListener('submit', function(e) {
+    eventForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+        const title = document.getElementById('event-title').value;
+        const category = document.getElementById('event-category').value;
+        const dateInput = document.getElementById('event-date').value;
+        const location = document.getElementById('event-location').value;
+        const description = document.getElementById('event-desc').value;
+        const image = document.getElementById('event-image').value;
 
-        const imageInput = document.getElementById('event-image');
-        const defaultImg = "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=600&q=80";
+        const formattedDate = new Date(dateInput).toISOString();
 
-        function saveEventData(imageUrl) {
-            if (editingEventId) {
-                // UPDATE EXISTING EVENT
-                events = events.map(ev => {
-                    if (ev.id === editingEventId) {
-                        return {
-                            ...ev,
-                            title: document.getElementById('event-title').value,
-                            category: document.getElementById('event-category').value,
-                            date: document.getElementById('event-date').value,
-                            location: document.getElementById('event-location').value,
-                            // Keep old image if no new file was chosen
-                            image: (imageInput.files && imageInput.files[0]) ? imageUrl : ev.image,
-                            description: document.getElementById('event-desc').value
-                        };
-                    }
-                    return ev;
-                });
-
-                localStorage.setItem('campusEvents', JSON.stringify(events));
-                alert('Event updated successfully!');
-                
-                // Reset editing state
-                editingEventId = null;
-                submitBtn.innerText = "Publish Event";
-                cancelBtn.style.display = "none";
-                eventForm.reset();
-                renderManagementList();
-
-            } else {
-                // CREATE NEW EVENT
-                const newEvent = {
-                    id: Date.now(),
-                    title: document.getElementById('event-title').value,
-                    category: document.getElementById('event-category').value,
-                    date: document.getElementById('event-date').value,
-                    location: document.getElementById('event-location').value,
-                    image: imageUrl,
-                    description: document.getElementById('event-desc').value
-                };
-
-                events.unshift(newEvent);
-                localStorage.setItem('campusEvents', JSON.stringify(events));
-
-                alert('Event published successfully!');
-                eventForm.reset();
-                window.location.href = 'index.html';
-            }
-        }
-
-        if (imageInput.files && imageInput.files[0]) {
-            const reader = new FileReader();
-            reader.onload = function(uploadEvent) {
-                saveEventData(uploadEvent.target.result);
-            };
-            reader.readAsDataURL(imageInput.files[0]);
-        } else {
-            saveEventData(defaultImg);
+        try {
+            await databases.createDocument(DATABASE_ID, COLLECTION_ID, ID.unique(), {
+                title, 
+                category, 
+                date: formattedDate, 
+                location, 
+                description, 
+                image
+            });
+            alert('Event published successfully!');
+            eventForm.reset();
+            loadAdminEvents();
+        } catch (error) {
+            alert('Failed to publish: ' + error.message);
         }
     });
 }
+
+// Load & Delete Events (Admin Management View)
+async function loadAdminEvents() {
+    const container = document.getElementById('admin-events-container');
+    if (!container) return;
+
+    try {
+        const response = await databases.listDocuments(DATABASE_ID, COLLECTION_ID);
+        const events = response.documents;
+
+        container.innerHTML = events.length === 0 ? '<p>No events available to manage.</p>' : '';
+        events.forEach(event => {
+            const card = document.createElement('div');
+            card.className = 'event-card';
+            card.innerHTML = `
+                <span class="event-category">${event.category}</span>
+                <h3>${event.title}</h3>
+                <p class="event-date">📅 ${formatDate(event.date)}</p>
+                <div style="padding: 1rem 1.2rem;">
+                    <button class="delete-btn" onclick="deleteEvent('${event.$id}')">Delete Event</button>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    } catch (error) {
+        console.error('Error loading admin view:', error);
+    }
+}
+
+// Delete Function (CRUD - Delete)
+window.deleteEvent = async function(id) {
+    if (!confirm('Are you sure you want to delete this event?')) return;
+    try {
+        await databases.deleteDocument(DATABASE_ID, COLLECTION_ID, id);
+        alert('Event deleted successfully.');
+        loadAdminEvents();
+    } catch (error) {
+        alert('Delete failed: ' + error.message);
+    }
+}
+
+const dummyEvents = [
+    {
+        title: "NUST Annual Tech Hackathon 2026",
+        category: "Tech / Innovation",
+        date: new Date(Date.now() + 86400000 * 3).toISOString(),
+        location: "Computer Science Lab 1",
+        description: "Join fellow developers to build localized software solutions and win exciting prizes.",
+        image: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97"
+    },
+    {
+        title: "AI & Machine Learning Seminar",
+        category: "Academic",
+        date: new Date(Date.now() + 86400000 * 7).toISOString(),
+        location: "Main Auditorium",
+        description: "An intensive seminar exploring modern neural networks and AI applications in Africa.",
+        image: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e"
+    },
+    {
+        title: "NUST SRC Welcome Music Jam",
+        category: "Social",
+        date: new Date(Date.now() + 86400000 * 12).toISOString(),
+        location: "University Student Square",
+        description: "Unwind after classes with live performances, games, and food stalls.",
+        image: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30"
+    },
+    {
+        title: "Inter-Faculty Basketball Championship",
+        category: "Sports",
+        date: new Date(Date.now() + 86400000 * 15).toISOString(),
+        location: "NUST Sports Arena",
+        description: "Come support the Computer Science and Engineering teams as they battle for the trophy.",
+        image: "https://images.unsplash.com/photo-1546519638-68e109498ffc"
+    },
+    {
+        title: "Career & Internship Expo 2026",
+        category: "Career",
+        date: new Date(Date.now() + 86400000 * 20).toISOString(),
+        location: "Great Hall",
+        description: "Network with top corporate tech firms, banks, and engineering enterprises looking for interns.",
+        image: "https://images.unsplash.com/photo-1515187029135-18ee286d815b"
+    },
+    {
+        title: "Cybersecurity Capture The Flag (CTF)",
+        category: "Tech / Competitions",
+        date: new Date(Date.now() + 86400000 * 25).toISOString(),
+        location: "Network Lab 3",
+        description: "Test your ethical hacking and vulnerability assessment skills in this fast-paced competition.",
+        image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b"
+    }
+];
