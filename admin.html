@@ -25,12 +25,12 @@
 
     <!-- Admin Password Gate -->
     <main class="container my-5" id="admin-gate" style="max-width: 450px;">
-        <div class="form-section">
+        <div class="form-section shadow-sm">
             <h2 class="mb-2">Admin Authentication</h2>
             <p class="text-muted mb-4 small">Restricted area. Authorized personnel only.</p>
             <form id="admin-pass-form">
                 <div class="form-group mb-3">
-                    <label for="admin-passcode">Passcode</label>
+                    <label for="admin-passcode">Passcode <span class="text-danger">*</span></label>
                     <input type="password" id="admin-passcode" class="form-control" required placeholder="••••••••">
                 </div>
                 <button type="submit" class="submit-btn">Access Dashboard</button>
@@ -42,32 +42,37 @@
     <main class="container my-4" id="admin-content" style="display: none;">
         <h2 class="mb-4 text-primary">Event Management Dashboard</h2>
         
-        <div class="form-section mb-5">
+        <div class="form-section shadow-sm mb-5">
             <h3 class="mb-3">Publish New Event</h3>
+            <div class="alert alert-secondary py-2 small mb-3">
+                <strong>Validation Notice:</strong> All fields are mandatory. Event dates must be set in the future, and uploaded images must be valid graphic files from your device gallery.
+            </div>
             <form id="event-form" class="mt-3">
                 <div class="form-group mb-3">
-                    <label for="event-title">Event Title</label>
+                    <label for="event-title">Event Title <span class="text-danger">*</span></label>
                     <input type="text" id="event-title" class="form-control" required placeholder="Hackathon 2026">
                 </div>
                 <div class="form-group mb-3">
-                    <label for="event-category">Category</label>
+                    <label for="event-category">Category <span class="text-danger">*</span></label>
                     <input type="text" id="event-category" class="form-control" required placeholder="Academic / Tech">
                 </div>
                 <div class="form-group mb-3">
-                    <label for="event-date">Date & Time (Must be in the future)</label>
+                    <label for="event-date">Date & Time <span class="text-danger">*</span></label>
                     <input type="datetime-local" id="event-date" class="form-control" required>
+                    <div class="form-text">Validated on submit: Past dates will be rejected.</div>
                 </div>
                 <div class="form-group mb-3">
-                    <label for="event-location">Location</label>
+                    <label for="event-location">Location <span class="text-danger">*</span></label>
                     <input type="text" id="event-location" class="form-control" required placeholder="NUST Main Auditorium">
                 </div>
                 <div class="form-group mb-3">
-                    <label for="event-desc">Description</label>
+                    <label for="event-desc">Description <span class="text-danger">*</span></label>
                     <textarea id="event-desc" class="form-control" rows="3" required placeholder="Details about the event..."></textarea>
                 </div>
                 <div class="form-group mb-3">
-                    <label for="event-image-file">Upload Image from Gallery</label>
+                    <label for="event-image-file">Upload Image from Gallery <span class="text-danger">*</span></label>
                     <input type="file" id="event-image-file" class="form-control" accept="image/*" required>
+                    <div class="form-text">Supported formats: PNG, JPG, JPEG, WebP.</div>
                 </div>
                 <button type="submit" class="submit-btn">Publish Event</button>
             </form>

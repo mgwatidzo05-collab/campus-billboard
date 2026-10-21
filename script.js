@@ -11,7 +11,7 @@ const storage = new Storage(client);
 
 const DATABASE_ID = '6ad7e4f8000773fc5f89';       
 const COLLECTION_ID = 'events';                   
-const BUCKET_ID = 'event-images'; 
+const BUCKET_ID = 'eventsimages'; 
 
 // --- ROUTE PROTECTION CHECK (Events page requires login) ---
 const currentPage = window.location.pathname.split('/').pop();

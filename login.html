@@ -23,17 +23,24 @@
         </div>
     </header>
 
-    <main class="container my-5" style="max-width: 500px;">
+    <main class="container my-5" style="max-width: 550px;">
+        <!-- Visual Media Header -->
+        <div class="text-center mb-4">
+            <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=600&q=80" alt="Students accessing online university resources" class="img-fluid rounded shadow-sm mb-3" style="max-height: 200px; width: 100%; object-fit: cover;" loading="lazy">
+        </div>
+
         <!-- Sign In Form -->
-        <section class="form-section" id="signin-section">
-            <h2>Student Sign In</h2>
-            <form id="signin-form" class="mt-4">
+        <section class="form-section shadow-sm" id="signin-section">
+            <h2 class="mb-2">Student Sign In</h2>
+            <p class="text-muted small mb-4">Access restricted to active NUST student accounts.</p>
+            <form id="signin-form">
                 <div class="form-group mb-3">
-                    <label for="signin-email">Institutional Email</label>
+                    <label for="signin-email">Institutional Email <span class="text-danger">*</span></label>
                     <input type="email" id="signin-email" class="form-control" pattern=".*@students\.nust\.ac\.zw$" title="Must be a @students.nust.ac.zw email" required placeholder="student@students.nust.ac.zw">
+                    <div class="form-text">Must end with <code>@students.nust.ac.zw</code></div>
                 </div>
                 <div class="form-group mb-3">
-                    <label for="signin-password">Password</label>
+                    <label for="signin-password">Password <span class="text-danger">*</span></label>
                     <input type="password" id="signin-password" class="form-control" required placeholder="••••••••">
                 </div>
                 <button type="submit" class="submit-btn">Sign In</button>
@@ -44,21 +51,25 @@
         </section>
 
         <!-- Sign Up Form (Hidden by default) -->
-        <section class="form-section" id="signup-section" style="display: none;">
-            <h2>Student Registration</h2>
-            <p class="text-muted small mb-3">Note: Must end with <strong>@students.nust.ac.zw</strong> and be at least 8 characters.</p>
-            <form id="signup-form" class="mt-3">
+        <section class="form-section shadow-sm" id="signup-section" style="display: none;">
+            <h2 class="mb-2">Student Registration</h2>
+            <div class="alert alert-info py-2 small mb-3">
+                <strong>Validation Rules:</strong> Email must be your official university address (<code>@students.nust.ac.zw</code>) and password must be at least 8 characters long.
+            </div>
+            <form id="signup-form">
                 <div class="form-group mb-3">
-                    <label for="signup-name">Full Name</label>
-                    <input type="text" id="signup-name" class="form-control" required placeholder="John Doe">
+                    <label for="signup-name">Full Name <span class="text-danger">*</span></label>
+                    <input type="text" id="signup-name" class="form-control" required placeholder="Munashe Gwatidzo">
                 </div>
                 <div class="form-group mb-3">
-                    <label for="signup-email">Institutional Email (@students.nust.ac.zw)</label>
+                    <label for="signup-email">Institutional Email <span class="text-danger">*</span></label>
                     <input type="email" id="signup-email" class="form-control" pattern=".*@students\.nust\.ac\.zw$" title="Must end with @students.nust.ac.zw" required placeholder="student@students.nust.ac.zw">
+                    <div class="form-text">Format: <code>username@students.nust.ac.zw</code></div>
                 </div>
                 <div class="form-group mb-3">
-                    <label for="signup-password">Password (Min. 8 characters)</label>
+                    <label for="signup-password">Password <span class="text-danger">*</span></label>
                     <input type="password" id="signup-password" class="form-control" minlength="8" required placeholder="••••••••">
+                    <div class="form-text">Minimum 8 secure characters.</div>
                 </div>
                 <button type="submit" class="submit-btn">Create Account</button>
                 <p class="mt-3 text-center">
@@ -68,7 +79,7 @@
         </section>
 
         <!-- Active Session Profile View -->
-        <section class="form-section text-center" id="user-profile" style="display: none;">
+        <section class="form-section text-center shadow-sm" id="user-profile" style="display: none;">
             <h2>Welcome, <span id="profile-name">Student</span>!</h2>
             <p class="my-3 text-muted">You have an active secure session on the platform.</p>
             <a href="events.html" class="btn btn-primary mb-3 w-100 fw-bold py-2">Browse Events Now</a>

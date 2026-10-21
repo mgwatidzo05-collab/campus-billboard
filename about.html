@@ -24,27 +24,31 @@
     </header>
 
     <main class="container my-5">
-        <section class="form-section mb-5">
-            <h2 class="mb-3 text-primary">About the Platform</h2>
-            <p class="text-muted" style="font-size: 1.05rem;">
-                The NUST Campus Event Billboard is a centralized web platform designed to keep students informed about academic seminars, tech hackathons, club meetups, and social gatherings happening across the National University of Science and Technology. By requiring official student registration, the system ensures verified and secure engagement across campus life.
+        <!-- Multimedia Banner with Campus Event Image -->
+        <section class="mb-5 text-center">
+            <img src="https://images.unsplash.com/photo-1511578314322-379afb476865?w=1200&q=80" alt="NUST students gathering at a campus event seminar" class="img-fluid rounded shadow mb-4" style="max-height: 400px; width: 100%; object-fit: cover;" loading="lazy">
+            <h2 class="text-primary fw-bold">About the Platform</h2>
+            <p class="text-muted mx-auto mt-2" style="max-width: 800px; font-size: 1.05rem;">
+                The NUST Campus Event Billboard is a centralized digital hub designed to keep students connected with academic seminars, tech hackathons, and social gatherings across the National University of Science and Technology.
             </p>
         </section>
 
-        <!-- Functional Contact Form (Satisfies extra page + form requirement) -->
-        <section class="form-section">
+        <!-- Functional Contact Form with Clear Validation Notes -->
+        <section class="form-section shadow-sm">
             <h3 class="mb-3">Contact Event Coordinators</h3>
+            <p class="text-muted small mb-4">Please fill out all fields correctly. Institutional validation rules apply.</p>
             <form id="contact-form" onsubmit="handleContact(event)">
                 <div class="form-group mb-3">
-                    <label for="contact-name">Full Name</label>
-                    <input type="text" id="contact-name" class="form-control" required placeholder="Munashe Gwatidzo">
+                    <label for="contact-name">Full Name <span class="text-danger">*</span></label>
+                    <input type="text" id="contact-name" class="form-control" required placeholder="John Doe">
                 </div>
                 <div class="form-group mb-3">
-                    <label for="contact-email">Institutional Email</label>
-                    <input type="email" id="contact-email" class="form-control" pattern=".*@students\.nust\.ac\.zw$" title="Must be a @students.nust.ac.zw email" required placeholder="student@students.nust.ac.zw">
+                    <label for="contact-email">Institutional Email <span class="text-danger">*</span></label>
+                    <input type="email" id="contact-email" class="form-control" pattern=".*@students\.nust\.ac\.zw$" title="Must be a @students.nust.ac.zw email" required placeholder=".nust.ac.zw">
+                    <div class="form-text text-muted">Must use your official format: <code>@students.nust.ac.zw</code></div>
                 </div>
                 <div class="form-group mb-3">
-                    <label for="contact-message">Message / Inquiry</label>
+                    <label for="contact-message">Message / Inquiry <span class="text-danger">*</span></label>
                     <textarea id="contact-message" class="form-control" rows="4" required placeholder="Type your message here..."></textarea>
                 </div>
                 <button type="submit" class="submit-btn">Send Message</button>
