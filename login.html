@@ -4,15 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Portal - NUST Campus Billboard</title>
+    <!-- Bootstrap 5 CSS Framework CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <header class="navbar">
         <div class="logo"><h2>NUST <span>Events</span></h2></div>
         <div class="menu-container">
-            <button class="menu-btn" onclick="toggleMenu(event)">Menu ☰</button>
+            <button class="menu-btn" id="menu-toggle" aria-expanded="false" onclick="toggleMenu(event)">Menu ☰</button>
             <ul class="dropdown-menu" id="dropdown-menu">
                 <li><a href="index.html">Home</a></li>
+                <li><a href="about.html">About & Contact</a></li>
                 <li><a href="events.html">Browse Events</a></li>
                 <li><a href="login.html" class="active">Student Portal</a></li>
                 <li><a href="admin.html">Admin Dashboard</a></li>
@@ -20,22 +23,22 @@
         </div>
     </header>
 
-    <main class="container" style="max-width: 500px; margin-top: 3rem;">
+    <main class="container my-5" style="max-width: 500px;">
         <!-- Sign In Form -->
         <section class="form-section" id="signin-section">
             <h2>Student Sign In</h2>
-            <form id="signin-form" style="margin-top: 1.5rem;">
-                <div class="form-group">
-                    <label>Email Address</label>
-                    <input type="email" id="signin-email" required placeholder="student@nust.ac.zw">
+            <form id="signin-form" class="mt-4">
+                <div class="form-group mb-3">
+                    <label for="signin-email">Institutional Email</label>
+                    <input type="email" id="signin-email" class="form-control" pattern=".*@students\.nust\.ac\.zw$" title="Must be a @students.nust.ac.zw email" required placeholder="student@students.nust.ac.zw">
                 </div>
-                <div class="form-group">
-                    <label>Password</label>
-                    <input type="password" id="signin-password" required placeholder="••••••••">
+                <div class="form-group mb-3">
+                    <label for="signin-password">Password</label>
+                    <input type="password" id="signin-password" class="form-control" required placeholder="••••••••">
                 </div>
                 <button type="submit" class="submit-btn">Sign In</button>
-                <p style="margin-top: 1rem; text-align: center;">
-                    Don't have an account? <a href="#" id="show-signup" style="color: var(--primary);">Register here</a>
+                <p class="mt-3 text-center">
+                    Don't have an account? <a href="#" id="show-signup" class="text-primary fw-bold">Register here</a>
                 </p>
             </form>
         </section>
@@ -43,45 +46,56 @@
         <!-- Sign Up Form (Hidden by default) -->
         <section class="form-section" id="signup-section" style="display: none;">
             <h2>Student Registration</h2>
-            <form id="signup-form" style="margin-top: 1.5rem;">
-                <div class="form-group">
-                    <label>Full Name</label>
-                    <input type="text" id="signup-name" required placeholder="John Doe">
+            <p class="text-muted small mb-3">Note: Must end with <strong>@students.nust.ac.zw</strong> and be at least 8 characters.</p>
+            <form id="signup-form" class="mt-3">
+                <div class="form-group mb-3">
+                    <label for="signup-name">Full Name</label>
+                    <input type="text" id="signup-name" class="form-control" required placeholder="John Doe">
                 </div>
-                <div class="form-group">
-                    <label>Institutional Email</label>
-                    <input type="email" id="signup-email" required placeholder="student@nust.ac.zw">
+                <div class="form-group mb-3">
+                    <label for="signup-email">Institutional Email (@students.nust.ac.zw)</label>
+                    <input type="email" id="signup-email" class="form-control" pattern=".*@students\.nust\.ac\.zw$" title="Must end with @students.nust.ac.zw" required placeholder="student@students.nust.ac.zw">
                 </div>
-                <div class="form-group">
-                    <label>Password (Min. 8 chars)</label>
-                    <input type="password" id="signup-password" required placeholder="••••••••">
+                <div class="form-group mb-3">
+                    <label for="signup-password">Password (Min. 8 characters)</label>
+                    <input type="password" id="signup-password" class="form-control" minlength="8" required placeholder="••••••••">
                 </div>
                 <button type="submit" class="submit-btn">Create Account</button>
-                <p style="margin-top: 1rem; text-align: center;">
-                    Already registered? <a href="#" id="show-signin" style="color: var(--primary);">Sign in here</a>
+                <p class="mt-3 text-center">
+                    Already registered? <a href="#" id="show-signin" class="text-primary fw-bold">Sign in here</a>
                 </p>
             </form>
         </section>
 
         <!-- Active Session Profile View -->
-        <section class="form-section" id="user-profile" style="display: none; text-align: center;">
+        <section class="form-section text-center" id="user-profile" style="display: none;">
             <h2>Welcome, <span id="profile-name">Student</span>!</h2>
-            <p style="margin: 1rem 0;">You have an active secure session. You can now browse events.</p>
-            <a href="events.html" class="btn-primary" style="display: inline-block; margin-bottom: 1rem;">Browse Events Now</a>
+            <p class="my-3 text-muted">You have an active secure session on the platform.</p>
+            <a href="events.html" class="btn btn-primary mb-3 w-100 fw-bold py-2">Browse Events Now</a>
             <br>
-            <button id="logout-btn" class="delete-btn" style="padding: 0.75rem 1.5rem;">Sign Out</button>
+            <button id="logout-btn" class="delete-btn w-100 py-2">Sign Out</button>
         </section>
     </main>
+
+    <footer class="bg-white text-center py-4 border-top mt-5">
+        <p class="text-muted mb-0">&copy; 2026 NUST Campus Event Billboard.</p>
+    </footer>
 
     <script>
         function toggleMenu(e) {
             e.stopPropagation();
             const menu = document.getElementById('dropdown-menu');
-            menu.classList.toggle('show');
+            const btn = document.getElementById('menu-toggle');
+            const isOpen = menu.classList.toggle('show');
+            btn.setAttribute('aria-expanded', isOpen);
         }
         window.onclick = function() {
             const menu = document.getElementById('dropdown-menu');
-            if (menu) menu.classList.remove('show');
+            const btn = document.getElementById('menu-toggle');
+            if (menu) {
+                menu.classList.remove('show');
+                if(btn) btn.setAttribute('aria-expanded', 'false');
+            }
         }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/appwrite@16.0.2"></script>

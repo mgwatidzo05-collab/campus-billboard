@@ -4,15 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Campus Event Billboard - NUST</title>
+    <!-- Bootstrap 5 CSS Framework CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <header class="navbar">
         <div class="logo"><h2>NUST <span>Events</span></h2></div>
         <div class="menu-container">
-            <button class="menu-btn" onclick="toggleMenu(event)">Menu ☰</button>
+            <button class="menu-btn" id="menu-toggle" aria-expanded="false" onclick="toggleMenu(event)">Menu ☰</button>
             <ul class="dropdown-menu" id="dropdown-menu">
                 <li><a href="index.html" class="active">Home</a></li>
+                <li><a href="about.html">About & Contact</a></li>
                 <li><a href="events.html">Browse Events</a></li>
                 <li><a href="login.html">Student Portal</a></li>
                 <li><a href="admin.html">Admin Dashboard</a></li>
@@ -20,35 +23,41 @@
         </div>
     </header>
 
-    <main class="container">
-        <section class="hero">
-            <h1>Welcome NUST Students!</h1>
-            <p>Your official gateway to discover what's happening around campus. Please sign up or sign in as a student first to unlock and view all active campus events.</p>
-            <div style="margin-top: 1.5rem;">
-                <a href="login.html" class="btn-primary" style="margin-right: 1rem;">Student Sign Up / Sign In</a>
+    <main class="container my-4">
+        <section class="hero p-5 text-white rounded shadow-sm mb-4" style="background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);">
+            <div class="row align-items-center">
+                <div class="col-lg-7">
+                    <h1 class="display-5 fw-bold mb-3">Welcome NUST Students!</h1>
+                    <p class="lead mb-4">Your official gateway to discover what's happening around campus. Sign up using your official student email to unlock and view all active campus events.</p>
+                    <a href="login.html" class="btn btn-light btn-lg text-primary fw-bold shadow-sm">Student Sign Up / Sign In</a>
+                </div>
+                <div class="col-lg-5 mt-4 mt-lg-0">
+                    <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=600&q=80" alt="NUST students collaborating and engaging in campus life" class="img-fluid rounded shadow" loading="lazy">
+                </div>
             </div>
         </section>
-
-        <section class="form-section" style="text-align: center; margin-top: 2rem;">
-            <h2>About the NUST Campus Event Billboard</h2>
-            <p style="margin-top: 1rem; color: var(--text-muted); max-width: 800px; margin-left: auto; margin-right: auto;">
-                The NUST Campus Event Billboard is a centralized platform designed to keep students informed about academic seminars, tech hackathons, club meetups, and social gatherings happening across the National University of Science and Technology. By creating an account, students gain instant access to verified campus happenings, helping you stay connected and engaged with student life.
-            </p>
-        </section>
     </main>
+
+    <footer class="bg-white text-center py-4 border-top mt-5">
+        <p class="text-muted mb-0">&copy; 2026 National University of Science and Technology (NUST) Campus Event Billboard.</p>
+    </footer>
 
     <script>
         function toggleMenu(e) {
             e.stopPropagation();
             const menu = document.getElementById('dropdown-menu');
-            menu.classList.toggle('show');
+            const btn = document.getElementById('menu-toggle');
+            const isOpen = menu.classList.toggle('show');
+            btn.setAttribute('aria-expanded', isOpen);
         }
         window.onclick = function() {
             const menu = document.getElementById('dropdown-menu');
-            if (menu) menu.classList.remove('show');
+            const btn = document.getElementById('menu-toggle');
+            if (menu) {
+                menu.classList.remove('show');
+                if(btn) btn.setAttribute('aria-expanded', 'false');
+            }
         }
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/appwrite@16.0.2"></script>
-    <script src="script.js"></script>
 </body>
 </html>

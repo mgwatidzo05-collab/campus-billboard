@@ -1,5 +1,5 @@
 // Initialize Appwrite SDK
-const { Client, Account, Databases, ID } = Appwrite;
+const { Client, Account, Databases, Storage, ID } = Appwrite;
 
 const client = new Client()
     .setEndpoint('https://cloud.appwrite.io/v1') 
@@ -7,20 +7,27 @@ const client = new Client()
 
 const account = new Account(client);
 const databases = new Databases(client);
+const storage = new Storage(client);
 
 const DATABASE_ID = '6ad7e4f8000773fc5f89';       
 const COLLECTION_ID = 'events';                   
+const BUCKET_ID = 'event-images'; 
 
 // --- ROUTE PROTECTION CHECK (Events page requires login) ---
 const currentPage = window.location.pathname.split('/').pop();
 
 if (currentPage === 'events.html') {
     window.addEventListener('DOMContentLoaded', async () => {
+        const container = document.getElementById('events-container');
+        const authWarning = document.getElementById('auth-warning');
         try {
             await account.get(); 
+            // Authenticated: load events
+            loadEvents();
         } catch (error) {
-            alert('Access Denied! You must sign up or sign in as a student to browse NUST events.');
-            window.location.href = 'login.html';
+            // Not authenticated: Show clear fallback warning instead of blank page
+            if (container) container.style.display = 'none';
+            if (authWarning) authWarning.style.display = 'block';
         }
     });
 }
@@ -47,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
-// --- AUTHENTICATION & FORM SWITCHING (Register / Sign In) ---
+// --- AUTHENTICATION & FORM SWITCHING ---
 document.addEventListener('DOMContentLoaded', () => {
     const showSignup = document.getElementById('show-signup');
     const showSignin = document.getElementById('show-signin');
@@ -69,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Register User (Auto-login & Redirect)
+// Register User (Enforcing @students.nust.ac.zw format)
 const signupForm = document.getElementById('signup-form');
 if (signupForm) {
     signupForm.addEventListener('submit', async (e) => {
@@ -77,6 +84,12 @@ if (signupForm) {
         const name = document.getElementById('signup-name').value;
         const email = document.getElementById('signup-email').value;
         const password = document.getElementById('signup-password').value;
+
+        // Strict email domain verification
+        if (!email.toLowerCase().endsWith('@students.nust.ac.zw')) {
+            alert('Registration Error: You must register using a valid NUST student email format ending with @students.nust.ac.zw');
+            return;
+        }
 
         try {
             await account.create(ID.unique(), email, password, name);
@@ -97,6 +110,11 @@ if (signinForm) {
         const email = document.getElementById('signin-email').value;
         const password = document.getElementById('signin-password').value;
 
+        if (!email.toLowerCase().endsWith('@students.nust.ac.zw')) {
+            alert('Login Error: Please use your @students.nust.ac.zw student email address.');
+            return;
+        }
+
         try {
             await account.createEmailPasswordSession(email, password);
             alert('Signed in successfully!');
@@ -107,7 +125,7 @@ if (signinForm) {
     });
 }
 
-// Session Check on Login Page Load
+// Session Check on Login Page
 window.addEventListener('DOMContentLoaded', async () => {
     const signinSection = document.getElementById('signin-section');
     const signupSection = document.getElementById('signup-section');
@@ -141,7 +159,7 @@ if (logoutBtn) {
 };
 
 
-// --- DATABASE CRUD LOGIC & DUMMY DATA SEEDING ---
+// --- DATABASE & STORAGE CRUD LOGIC ---
 
 function formatDate(dateString) {
     if (!dateString) return 'TBA';
@@ -160,7 +178,7 @@ async function seedDummyDataIfEmpty(events) {
             date: new Date(Date.now() + 86400000 * 3).toISOString(),
             location: "Computer Science Lab 1",
             description: "Join fellow developers to build localized software solutions and win exciting prizes.",
-            image: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97"
+            image: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400&q=80"
         },
         {
             title: "AI & Machine Learning Seminar",
@@ -168,7 +186,7 @@ async function seedDummyDataIfEmpty(events) {
             date: new Date(Date.now() + 86400000 * 7).toISOString(),
             location: "Main Auditorium",
             description: "An intensive seminar exploring modern neural networks and AI applications in Africa.",
-            image: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e"
+            image: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=400&q=80"
         },
         {
             title: "NUST SRC Welcome Music Jam",
@@ -176,7 +194,31 @@ async function seedDummyDataIfEmpty(events) {
             date: new Date(Date.now() + 86400000 * 12).toISOString(),
             location: "University Student Square",
             description: "Unwind after classes with live performances, games, and food stalls.",
-            image: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30"
+            image: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400&q=80"
+        },
+        {
+            title: "Inter-Faculty Basketball Championship",
+            category: "Sports",
+            date: new Date(Date.now() + 86400000 * 15).toISOString(),
+            location: "NUST Sports Arena",
+            description: "Come support the Computer Science and Engineering teams as they battle for the trophy.",
+            image: "https://images.unsplash.com/photo-1546519638-68e109498ffc?w=400&q=80"
+        },
+        {
+            title: "Career & Internship Expo 2026",
+            category: "Career",
+            date: new Date(Date.now() + 86400000 * 20).toISOString(),
+            location: "Great Hall",
+            description: "Network with top corporate tech firms, banks, and engineering enterprises looking for interns.",
+            image: "https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=400&q=80"
+        },
+        {
+            title: "Cybersecurity Capture The Flag (CTF)",
+            category: "Tech / Competitions",
+            date: new Date(Date.now() + 86400000 * 25).toISOString(),
+            location: "Network Lab 3",
+            description: "Test your ethical hacking and vulnerability assessment skills in this fast-paced competition.",
+            image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=400&q=80"
         }
     ];
 
@@ -209,7 +251,7 @@ async function loadEvents() {
             const card = document.createElement('div');
             card.className = 'event-card';
             card.innerHTML = `
-                <img src="${event.image || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87'}" alt="Event">
+                <img src="${event.image || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400&q=80'}" alt="${event.title} event banner" loading="lazy">
                 <span class="event-category">${event.category}</span>
                 <h3>${event.title}</h3>
                 <p class="event-date">📅 ${formatDate(event.date)}</p>
@@ -222,9 +264,8 @@ async function loadEvents() {
         console.error('Error fetching documents:', error);
     }
 }
-loadEvents();
 
-// Create Event (Admin Page)
+// Create Event with Gallery File Upload & Date Validation (Admin Page)
 const eventForm = document.getElementById('event-form');
 if (eventForm) {
     eventForm.addEventListener('submit', async (e) => {
@@ -234,20 +275,39 @@ if (eventForm) {
         const dateInput = document.getElementById('event-date').value;
         const location = document.getElementById('event-location').value;
         const description = document.getElementById('event-desc').value;
-        const image = document.getElementById('event-image').value;
+        const imageFile = document.getElementById('event-image-file').files[0];
 
-        const formattedDate = new Date(dateInput).toISOString();
+        // Form Validation: Ensure date is not in the past
+        const selectedDate = new Date(dateInput);
+        if (selectedDate < new Date()) {
+            alert('Validation Error: Event date cannot be set in the past.');
+            return;
+        }
+
+        const formattedDate = selectedDate.toISOString();
 
         try {
+            // 1. Upload image file to Appwrite Storage Bucket
+            const uploadedFile = await storage.createFile(
+                BUCKET_ID,
+                ID.unique(),
+                imageFile
+            );
+
+            // 2. Get the public file view URL from Appwrite Storage
+            const imageUrl = storage.getFileView(BUCKET_ID, uploadedFile.$id);
+
+            // 3. Save event document along with the image URL to the database
             await databases.createDocument(DATABASE_ID, COLLECTION_ID, ID.unique(), {
                 title, 
                 category, 
                 date: formattedDate, 
                 location, 
                 description, 
-                image
+                image: imageUrl
             });
-            alert('Event published successfully!');
+
+            alert('Event and gallery image published successfully!');
             eventForm.reset();
             loadAdminEvents();
         } catch (error) {
@@ -295,54 +355,3 @@ window.deleteEvent = async function(id) {
         alert('Delete failed: ' + error.message);
     }
 }
-
-const dummyEvents = [
-    {
-        title: "NUST Annual Tech Hackathon 2026",
-        category: "Tech / Innovation",
-        date: new Date(Date.now() + 86400000 * 3).toISOString(),
-        location: "Computer Science Lab 1",
-        description: "Join fellow developers to build localized software solutions and win exciting prizes.",
-        image: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97"
-    },
-    {
-        title: "AI & Machine Learning Seminar",
-        category: "Academic",
-        date: new Date(Date.now() + 86400000 * 7).toISOString(),
-        location: "Main Auditorium",
-        description: "An intensive seminar exploring modern neural networks and AI applications in Africa.",
-        image: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e"
-    },
-    {
-        title: "NUST SRC Welcome Music Jam",
-        category: "Social",
-        date: new Date(Date.now() + 86400000 * 12).toISOString(),
-        location: "University Student Square",
-        description: "Unwind after classes with live performances, games, and food stalls.",
-        image: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30"
-    },
-    {
-        title: "Inter-Faculty Basketball Championship",
-        category: "Sports",
-        date: new Date(Date.now() + 86400000 * 15).toISOString(),
-        location: "NUST Sports Arena",
-        description: "Come support the Computer Science and Engineering teams as they battle for the trophy.",
-        image: "https://images.unsplash.com/photo-1546519638-68e109498ffc"
-    },
-    {
-        title: "Career & Internship Expo 2026",
-        category: "Career",
-        date: new Date(Date.now() + 86400000 * 20).toISOString(),
-        location: "Great Hall",
-        description: "Network with top corporate tech firms, banks, and engineering enterprises looking for interns.",
-        image: "https://images.unsplash.com/photo-1515187029135-18ee286d815b"
-    },
-    {
-        title: "Cybersecurity Capture The Flag (CTF)",
-        category: "Tech / Competitions",
-        date: new Date(Date.now() + 86400000 * 25).toISOString(),
-        location: "Network Lab 3",
-        description: "Test your ethical hacking and vulnerability assessment skills in this fast-paced competition.",
-        image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b"
-    }
-];
